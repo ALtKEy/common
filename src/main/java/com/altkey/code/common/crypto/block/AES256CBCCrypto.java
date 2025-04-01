@@ -2,8 +2,6 @@ package com.altkey.code.common.crypto.block;
 
 import com.altkey.code.common.crypto.Crypto;
 import com.altkey.code.common.crypto.enums.BlockTransformation;
-import com.altkey.code.common.crypto.enums.CryptoAlgorithm;
-import com.altkey.code.common.utils.EnumUtils;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -11,6 +9,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -26,12 +25,16 @@ public class AES256CBCCrypto extends AbstractCBCBlockTransformation implements C
     //
     private Cipher cipher;
 
-    private SecretKeyFactory pbkdf2Factory;
-
-    private BlockTransformation blockTransformation;
+    private final String transformation = "AES/CBC/PKCS5Padding";
 
     public AES256CBCCrypto(byte[] key) {
         super(key);
+        try {
+            this.cipher = Cipher.getInstance(this.transformation);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+            // 예외가 발생했을경우 Java 환경 설정에서 제거를 했거나 JCE(Java Cryptographic Extension) Provider 를 점검
+            // JCE 나 JVM 쪽에 특별한 작업을 하지 않앗을 경우 정상 작동하므로 별도의 추가 처리는 하지 않는다.
+        }
     }
 
     @Override
@@ -42,7 +45,6 @@ public class AES256CBCCrypto extends AbstractCBCBlockTransformation implements C
 
         try {
             super.generateSecureRandomInitVector(iv, salt);
-            CryptoAlgorithm algorithm = EnumUtils.getEnum(CryptoAlgorithm.class, "AES");
             // 키 생성
             SecretKey key = new SecretKeySpec(super.generatePBKDF2Secret(salt, 10000, 256), "AES");
 

@@ -15,7 +15,7 @@ import java.io.IOException;
  * @since 2025-03-30
  */
 public class CloseDeleteDirectoryFileInputStream extends FileInputStream {
-    //
+    // Close 가 될때 파일 위치를 알기 위해 저장
     private final File file;
 
     public CloseDeleteDirectoryFileInputStream(File file) throws FileNotFoundException {
@@ -31,6 +31,7 @@ public class CloseDeleteDirectoryFileInputStream extends FileInputStream {
     @Override
     public void close() throws IOException {
         super.close();
+        // 폴더이므로 파일명을 제외한 경로를 가져옴
         FileUtils.deleteDirectoryIfExists(file.getCanonicalPath().replace(file.getName(), ""));
     }
 }
